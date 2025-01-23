@@ -1,1 +1,1 @@
-# bb-hackathon
+# Digital fair portal for [Revúca](https://revuca.sk) city
