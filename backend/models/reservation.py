@@ -1,20 +1,42 @@
-from uuid import UUID
-from sqlalchemy.orm import Mapped
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID as PUUID
+from sqlalchemy.orm import mapped_column, relationship
 from backend.models.base import BaseModel
 
 
 class Reservation(BaseModel):
     """
-    Represents a reservation in the system.
+    Reservation model representing a reservation entity in the system.
     Attributes:
-        business_id (UUID): The unique identifier for the business associated with the reservation.
-        fair_id (UUID): The unique identifier for the fair associated with the reservation.
-        place_id (UUID): The unique identifier for the place associated with the reservation.
-        payment_id (UUID): The unique identifier for the payment associated with the reservation.
+        __tablename__ (str): The name of the table in the database.
+        business_id (UUID): Foreign key referencing the business entity.
+        payment_id (UUID): Foreign key referencing the payment entity, must be unique.
+        fair_id (UUID): Foreign key referencing the fair entity.
+        place_id (UUID): Foreign key referencing the place entity.
+    Constraints:
+        __table_args__ (tuple): Unique constraint ensuring one place per fair per reservation.
+    Relationships:
+        business (relationship): Relationship to the Business model.
+        payment (relationship): Relationship to the Payment model.
+        fair (relationship): Relationship to the Fair model.
+        place (relationship): Relationship to the Place model.
     """
 
+
     __tablename__ = "reservation"
-    business_id: Mapped[UUID]
-    fair_id: Mapped[UUID]
-    place_id: Mapped[UUID]
-    payment_id: Mapped[UUID]
+
+    business_id = mapped_column(PUUID, ForeignKey("business.id"))
+    payment_id = mapped_column(PUUID, ForeignKey("payment.id"), unique=True)
+    fair_id = mapped_column(PUUID, ForeignKey("fair.id"))
+    place_id = mapped_column(PUUID, ForeignKey("place.id"))
+
+    # Unique Constraint: 1 Place per Fair per Reservation
+    __table_args__ = (
+        UniqueConstraint("fair_id", "place_id", name="uq_reservation_fair_place"),
+    )
+
+    # Relationships
+    business = relationship("Business", back_populates="reservations")
+    payment = relationship("Payment", back_populates="reservation")
+    fair = relationship("Fair", back_populates="reservations")
+    place = relationship("Place", back_populates="reservations")

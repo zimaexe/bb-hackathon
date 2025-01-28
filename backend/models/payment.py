@@ -1,17 +1,19 @@
-from sqlalchemy.orm import Mapped, mapped_column
-from uuid import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.models.base import BaseModel
 
 
 class Paymnet(BaseModel):
     """
-    Represents a payment record in the database.
+    Represents a payment model in the database.
     Attributes:
         __tablename__ (str): The name of the table in the database.
-        payment_status (str): The status of the payment, default is "pending".
-        reservation_id (UUID): The unique identifier for the associated reservation.
+        payment_status (Mapped[str]): The status of the payment, defaults to "pending".
+        reservation (relationship): A one-to-one relationship with the Reservation model.
     """
 
-    __tablename__ = "paymnet"
+
+    __tablename__ = "payment"
     payment_status: Mapped[str] = mapped_column(default="pendign")
-    reservation_id: Mapped[UUID]
+    # 1:1 with Reservation
+    reservation = relationship("Reservation", back_populates="payment", uselist=False)
+

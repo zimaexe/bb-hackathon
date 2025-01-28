@@ -1,22 +1,22 @@
-from typing import Optional
-from uuid import UUID
 from sqlalchemy import String, INT, BOOLEAN
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.models.base import BaseModel
+from backend.models.base import BaseModel, fair_place_association
 
 
 class Place(BaseModel):
     """
-    Place model representing a location with various attributes.
+    Represents a Place entity in the database.
     Attributes:
-        place_name (str): The name of the place, unique and up to 50 characters.
-        place_zona (int): The zone identifier of the place.
-        place_cordinates (str): The coordinates of the place, unique and up to 50 characters.
+        __tablename__ (str): The name of the database table.
+        place_name (str): The name of the place, unique and nullable.
+        place_zona (int): The zone of the place, nullable.
+        place_cordinates (str): The coordinates of the place, unique and nullable.
         place_reservated (bool): Indicates if the place is reserved, defaults to False.
-        fairs (Optional[list[UUID]]): A list of UUIDs representing fairs associated with the place, stored as JSONB.
+        fairs (List[Fair]): Many-to-Many relationship with the Fair entity.
+        reservations (List[Reservation]): One-to-Many relationship with the Reservation entity, limited to one per Fair via constraint.
     """
+
 
     __tablename__ = "place"
 
@@ -27,4 +27,9 @@ class Place(BaseModel):
     )
     place_reservated: Mapped[bool] = mapped_column(BOOLEAN, default=False)
 
-    fairs: Mapped[Optional[list[UUID]]] = mapped_column(JSONB, default=list)
+    # Many-to-Many with Fair
+    fairs = relationship(
+        "Fair", secondary=fair_place_association, back_populates="places"
+    )
+    # 1 Place -> Many Reservations (but limited to 1 per Fair via constraint)
+    reservations = relationship("Reservation", back_populates="place")

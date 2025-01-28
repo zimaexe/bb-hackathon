@@ -1,25 +1,29 @@
-from typing import Optional
-
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, relationship
 from datetime import datetime
-from uuid import UUID
-from backend.models.base import BaseModel
+from backend.models.base import BaseModel, fair_place_association
 
 
 class Fair(BaseModel):
     """
-    Represents a Fair model.
+    Represents a Fair entity.
     Attributes:
         __tablename__ (str): The name of the table in the database.
-        name (str): The name of the fair.
-        start_day (datetime): The starting date of the fair.
-        end_day (datetime): The ending date of the fair.
-        fair_places (Optional[list[UUID]]): A list of UUIDs representing the places associated with the fair.
+        name (Mapped[str]): The name of the fair.
+        start_day (Mapped[datetime]): The start date of the fair.
+        end_day (Mapped[datetime]): The end date of the fair.
+        places (relationship): A many-to-many relationship with the Place entity.
+        reservations (relationship): A one-to-many relationship with the Reservation entity.
     """
+
 
     __tablename__ = "fair"
     name: Mapped[str]
     start_day: Mapped[datetime]
     end_day: Mapped[datetime]
-    fair_places: Mapped[Optional[list[UUID]]] = mapped_column(JSONB, default=list)
+
+    # Many-to-Many with Place
+    places = relationship(
+        "Place", secondary=fair_place_association, back_populates="fairs"
+    )
+    # 1 Fair -> Many Reservations
+    reservations = relationship("Reservation", back_populates="fair")
