@@ -4,14 +4,15 @@ from loguru import logger
 
 import sys
 
-from core.config import settings
-
+from backend.core.config import settings
+from backend.api.place import router as place_router
 # Initialize FastAPI app
 app = FastAPI()
 
 app.add_middleware(
     SessionMiddleware, secret_key=settings.secret_key, same_site="lax", max_age=None
 )
+app.include_router(place_router, tags=["Place"])
 
 # Configure Loguru
 logger.remove()  # Remove default logger to configure custom settings
