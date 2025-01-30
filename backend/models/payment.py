@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.models.base import BaseModel
 
 
-class Paymnet(BaseModel):
+class Payment(BaseModel):
     """
     Represents a payment model in the database.
     Attributes:
