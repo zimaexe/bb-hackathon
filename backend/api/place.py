@@ -1,10 +1,8 @@
-from uuid import UUID
-
-from fastapi import APIRouter, Depends, HTTPException, status, Security
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from backend.schemas.place import PlaceCreate, PlaceResponse, PlaceUpdate
+from backend.schemas.place import PlaceCreate, PlaceResponse
 from backend.crud.place import place_crud
 from backend.crud.fair import fair_crud
 from backend.db.session import get_db
@@ -12,7 +10,9 @@ from backend.db.session import get_db
 router = APIRouter()
 
 
-@router.post("/create_place", response_model=PlaceResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/create_place", response_model=PlaceResponse, status_code=status.HTTP_200_OK
+)
 async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
     """
     Create a new place.
@@ -29,7 +29,9 @@ async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
         HTTPException: If an error occurs during the creation process (HTTP 500).
     """
 
-    db_fair = await place_crud.get_place_by_cordinates(db=db, name=place.place_cordinates)
+    db_fair = await place_crud.get_place_by_cordinates(
+        db=db, name=place.place_cordinates
+    )
     if db_fair:
         logger.error(
             f"Error creating place: Place with cordinates {place.place_cordinates} already exist."
@@ -49,8 +51,14 @@ async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
     return place
 
 
-@router.post("/add_place_to_fair", response_model=PlaceResponse, status_code=status.HTTP_202_ACCEPTED)
-async def add_place_fair(place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)):
+@router.post(
+    "/add_place_to_fair",
+    response_model=PlaceResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def add_place_fair(
+    place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)
+):
     """
     Asynchronously adds a fair to a place based on provided coordinates and fair name.
     Args:
@@ -67,12 +75,24 @@ async def add_place_fair(place_cordinates: str, fair_name: str, db: AsyncSession
     fair = fair_crud.get_by_name(db=db, name=fair_name)
 
     if not place or not fair:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Place with cordinates or fair with name was not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Place with cordinates or fair with name was not found",
+        )
 
-    return await place_crud.add_fair_to_place(db=db, place_cordinates=place_cordinates, fair=fair)
+    return await place_crud.add_fair_to_place(
+        db=db, place_cordinates=place_cordinates, fair=fair
+    )
 
-@router.post("/remove_place_from_fair", response_model=PlaceResponse, status_code=status.HTTP_202_ACCEPTED)
-async def add_place_fair(place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)):
+
+@router.post(
+    "/remove_place_from_fair",
+    response_model=PlaceResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def add_place_fair(
+    place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)
+):
     """
     Asynchronously adds a fair to a place based on provided coordinates and fair name.
     Args:
@@ -89,6 +109,11 @@ async def add_place_fair(place_cordinates: str, fair_name: str, db: AsyncSession
     fair = fair_crud.get_by_name(db=db, name=fair_name)
 
     if not place or not fair:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Place with cordinates or fair with name was not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Place with cordinates or fair with name was not found",
+        )
 
-    return await place_crud.remove_fair_from_place(db=db, place_cordinates=place_cordinates, fair=fair)
+    return await place_crud.remove_fair_from_place(
+        db=db, place_cordinates=place_cordinates, fair=fair
+    )

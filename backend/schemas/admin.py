@@ -36,6 +36,7 @@ class AdminUpdate(AdminCreate):
 
     pass
 
+
 class AdminResponse(AdminBase):
     """
     AdminResponse schema for representing an admin entity response.
