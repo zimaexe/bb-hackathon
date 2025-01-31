@@ -14,7 +14,7 @@ class BusinessBase(BaseModel):
     """
 
     email: EmailStr
-    phone: PhoneNumber
+    phone: str
     business_name: str
 
 
