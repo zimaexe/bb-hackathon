@@ -6,24 +6,24 @@ import Sidebar from '../../components/sidebar';
 import { UUID } from 'crypto';
 import { NextRouter, useRouter } from 'next/router';
 
-class EventType {
-  eventName: string;
-  eventDates: { from: string; to: string; };
-  eventID: UUID;
+class FairType {
+  name: string;
+  dates: { from: string; to: string; };
+  id: UUID;
 
   constructor(
     eventName: string,
     eventDates: { from: string; to: string; },
     eventID: UUID
   ) {
-    this.eventName = eventName;
-    this.eventDates = eventDates;
-    this.eventID = eventID;
+    this.name = eventName;
+    this.dates = eventDates;
+    this.id = eventID;
   }
 
-  from() { return this.eventDates.from; }
+  from() { return this.dates.from; }
 
-  to() { return this.eventDates.to; }
+  to() { return this.dates.to; }
 
   deadline() {
     const threeWeeks = 1000 * 60 * 60 * 24 * 21;
@@ -31,12 +31,12 @@ class EventType {
   }
 };
 
-interface EventProps {
-  event: EventType;
+interface FairProps {
+  event: FairType;
   router: NextRouter;
 }
 
-function Event({ event, router } : EventProps) {
+function Fair({ event, router } : FairProps) {
   const fromDate = new Date(event.from());
   const toDate = new Date(event.to());
   const months = [
@@ -58,9 +58,9 @@ function Event({ event, router } : EventProps) {
         flex justify-between
         cursor-pointer hover:bg-opacity-[0.5]
         px-[20px] py-[20px] rounded-[20px_0px_20px_20px] w-full"
-      onClick={() => router.push(`/user/fairs?eventID=${event.eventID}`)}
+      onClick={() => router.push(`/user/fairs?eventID=${event.id}`)}
     >
-      <p className='text-[24px]'>{event.eventName}</p>
+      <p className='text-[24px]'>{event.name}</p>
       <div className='flex flex-col gap-[10px] items-end text-[18px]'>
         <p className='text-[#606060]'>{eventDatesText}</p>
         <p className='text-[#D36262]'>{deadlineText}</p>
@@ -69,11 +69,37 @@ function Event({ event, router } : EventProps) {
   )
 }
 
+function FairList({ events, router } : { events: FairType[], router: NextRouter }) {
+  return (
+    <>
+      <h1 className="font-bold text-[48px]">Aktualne jarmoky</h1>
+      <div className="flex flex-col gap-[30px] w-full">
+        {events.map((event, index) => (<Fair key={index} router={router} event={event} />))}
+      </div>
+    </>
+  )
+}
+
+function FairDetail({ events, eventID } : { events: FairType[], eventID: string }) {
+  return (
+    <>
+      <h1 className="font-bold text-[48px]">Detail jarmoku</h1>
+      <div className="
+        flex flex-col gap-[30px]
+        w-full
+      ">
+        <p>eventID: {eventID}</p>
+        <p>nazov: {events.filter((event) => event.id === eventID)[0]?.name}</p>
+      </div>
+    </>
+  )
+}
+
 export default function Fairs() {
   const router = useRouter();
 
-  const events: EventType[] = [
-    new EventType(
+  const events: FairType[] = [
+    new FairType(
       'zimny revucky jarmok 2024',
       {
         from: '2024-11-15',
@@ -81,7 +107,7 @@ export default function Fairs() {
       },
       'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
     ),
-    new EventType(
+    new FairType(
       'letny revucky jarmok 2024',
       {
         from: '2024-06-15',
@@ -107,29 +133,8 @@ export default function Fairs() {
           flex flex-col gap-[30px]
           w-full
         ">
-          {eventID && (
-            <>
-              <h1 className="font-bold text-[48px]">Detail jarmoku</h1>
-              <div className="
-                flex flex-col gap-[30px]
-                w-full
-              ">
-                <p>eventID: {eventID}</p>
-                <p>nazov: {events.filter((event) => event.eventID === eventID)[0]?.eventName}</p>
-              </div>
-            </>
-          )}
-          {!eventID && (
-            <>
-              <h1 className="font-bold text-[48px]">Aktualne jarmoky</h1>
-              <div className="
-                flex flex-col gap-[30px]
-                w-full
-              ">
-                {events.map((event, index) => (<Event key={index} router={router} event={event} />))}
-              </div>
-            </>
-          )}
+          {eventID && <FairDetail events={events} eventID={eventID} />}
+          {!eventID && <FairList events={events} router={router} />}
         </div>
       </div>
     </div>
