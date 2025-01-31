@@ -1,4 +1,4 @@
-# Getting Started with frontend part
+# Getting started with frontend part
 
 First, run the development server:
 
