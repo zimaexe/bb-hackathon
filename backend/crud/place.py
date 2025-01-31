@@ -39,7 +39,7 @@ class CRUDPlace(CRUDBase[Place, PlaceCreate, PlaceUpdate]):
         return db_place
 
     @staticmethod
-    async def get_place_by_cordinates(db: AsyncSession, place_cordinates: str) -> "Place":
+    async def get_place_by_cordinates(db: AsyncSession, place_cordinates: str) -> Place:
         """
         Retrieve a Place object from the database based on its coordinates.
         Args:

@@ -1,18 +1,29 @@
-from datetime import timezone
-
+from datetime import datetime, tzinfo
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List, Optional
 
-from backend.crud.base import CRUDBase, CreateSchemaType, ModelType
+from backend.crud.base import CRUDBase
 from backend.models.fair import Fair
 from backend.schemas.fair import FairCreate, FairUpdate
+
+
 
 
 class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
     """
     CRUD operations for the Fair model.
     """
+    @staticmethod
+    async def get_all_active_fairs(db: AsyncSession) -> List[Fair]:
+        """
+        Retrieve all active fairs.
+        :param db: Database session.
+        :return: List of active Fairs.
+        """
+        stmt = select(Fair).filter(Fair.end_day >= datetime.now())
+        result = await db.execute(stmt)
+        return result.scalars().all()
 
     @staticmethod
     async def get_by_name(db: AsyncSession, name: str) -> Optional[Fair]:
@@ -58,7 +69,7 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
 
         fair = await CRUDFair.get_by_name(db=db, name=fair_in.name)
         if not fair:
-            return
+            return None
 
         fair.name = fair_in.name
         fair.start_day = fair_in.start_day.replace(tzinfo=None)

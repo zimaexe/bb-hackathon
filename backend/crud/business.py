@@ -1,5 +1,5 @@
-from sqlalchemy.ext.asyncio import AsyncSession, select
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from backend.crud.base import CRUDBase
 from backend.models.business import Business
 from backend.schemas.business import BusinessCreate, BusinessUpdate

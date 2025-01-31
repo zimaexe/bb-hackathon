@@ -79,3 +79,17 @@ async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
             detail="Something went wrong.",
         )
     return fair
+
+
+@router.get("/get_all_active_fairs", response_model=List[FairResponse], status_code=status.HTTP_200_OK)
+async def get_all_fairs(db: AsyncSession = Depends(get_db)) -> List[FairResponse]:
+    """
+    Retrieve all fairs.
+    Args:
+        db (AsyncSession): The database session.
+    Returns:
+        List[FairResponse]: A list of all fairs in the database.
+    """
+
+    fairs = await fair_crud.get_all_active_fairs(db=db)
+    return [FairResponse.model_validate(fair) for fair in fairs]
