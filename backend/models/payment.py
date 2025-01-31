@@ -11,9 +11,7 @@ class Payment(BaseModel):
         reservation (relationship): A one-to-one relationship with the Reservation model.
     """
 
-
     __tablename__ = "payment"
     payment_status: Mapped[str] = mapped_column(default="pendign")
     # 1:1 with Reservation
     reservation = relationship("Reservation", back_populates="payment", uselist=False)
-

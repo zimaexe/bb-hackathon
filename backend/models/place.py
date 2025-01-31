@@ -17,13 +17,12 @@ class Place(BaseModel):
         reservations (List[Reservation]): One-to-Many relationship with the Reservation entity, limited to one per Fair via constraint.
     """
 
-
     __tablename__ = "place"
 
-    place_name: Mapped[str] = mapped_column(String(50), unique=True, nullable=True)
+    place_name: Mapped[str] = mapped_column(String(50), unique=False)
     place_zona: Mapped[int] = mapped_column(INT, nullable=True)
     place_cordinates: Mapped[str] = mapped_column(
-        String(50), unique=True, nullable=True
+        String(50), nullable=True, unique=True
     )
     place_reservated: Mapped[bool] = mapped_column(BOOLEAN, default=False)
 

@@ -5,14 +5,22 @@ from loguru import logger
 import sys
 
 from backend.core.config import settings
+from backend.api.reservation import router as reservation_router
 from backend.api.place import router as place_router
+from backend.api.fair import router as fair_router
+from backend.api.auth import router as auth_router
+
 # Initialize FastAPI app
 app = FastAPI()
+app.include_router(place_router, tags=["Place"])
+app.include_router(fair_router, tags=["Fair"])
+app.include_router(auth_router, tags=["Auth"])
+app.include_router(reservation_router, tags=["Reservation"])
 
 app.add_middleware(
     SessionMiddleware, secret_key=settings.secret_key, same_site="lax", max_age=None
 )
-app.include_router(place_router, tags=["Place"])
+
 
 # Configure Loguru
 logger.remove()  # Remove default logger to configure custom settings
