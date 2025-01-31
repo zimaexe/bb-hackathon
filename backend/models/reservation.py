@@ -22,7 +22,6 @@ class Reservation(BaseModel):
         place (relationship): Relationship to the Place model.
     """
 
-
     __tablename__ = "reservation"
 
     business_id = mapped_column(PUUID, ForeignKey("business.id"))

@@ -1,7 +1,6 @@
-from datetime import datetime, tzinfo
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import List, Optional
+from typing import Optional
 
 from backend.crud.base import CRUDBase
 from backend.models.fair import Fair
@@ -65,7 +64,6 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
         Returns:
             Fair: The updated fair object, or None if the fair does not exist.
         """
-
 
         fair = await CRUDFair.get_by_name(db=db, name=fair_in.name)
         if not fair:

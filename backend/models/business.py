@@ -14,7 +14,6 @@ class Business(UserBase):
         reservations (relationship): A relationship to the Reservation model, indicating that one business can have many reservations.
     """
 
-
     __tablename__ = "business"
     business_name: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)

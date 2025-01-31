@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 from loguru import logger
 
 from backend.db.session import get_db
@@ -13,7 +12,9 @@ from backend.schemas.fair import FairCreate, FairResponse
 router = APIRouter()
 
 
-@router.post("/crete_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/crete_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_fair(
     fair_in: FairCreate, db: AsyncSession = Depends(get_db)
 ) -> FairResponse:
@@ -34,9 +35,7 @@ async def create_fair(
     logger.info(f"Creating fair with name: {fair_in.name}")
     db_fair = await fair_crud.get_by_name(db=db, name=fair_in.name)
     if db_fair:
-        logger.error(
-            f"Error creating fair: Name {fair_in.name} already registered."
-        )
+        logger.error(f"Error creating fair: Name {fair_in.name} already registered.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Name already registered.",
@@ -53,7 +52,10 @@ async def create_fair(
         )
     return fair
 
-@router.post("/change_fair", response_model=FairResponse, status_code=status.HTTP_200_OK)
+
+@router.post(
+    "/change_fair", response_model=FairResponse, status_code=status.HTTP_200_OK
+)
 async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
     """
     Change the details of an existing fair.

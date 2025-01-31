@@ -2,8 +2,6 @@ from uuid import UUID
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.schemas.place import PlaceBase
-
 
 class FairBase(BaseModel):
     """

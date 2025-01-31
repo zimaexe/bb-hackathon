@@ -15,7 +15,6 @@ class Fair(BaseModel):
         reservations (relationship): A one-to-many relationship with the Reservation entity.
     """
 
-
     __tablename__ = "fair"
     name: Mapped[str]
     start_day: Mapped[datetime]
