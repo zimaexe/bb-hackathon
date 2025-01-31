@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
-
+from typing import Annotated
 from backend.db.session import get_db
-
+from backend.services.auth import get_current_user_email
 from backend.crud.fair import fair_crud
 
 from backend.schemas.fair import FairCreate, FairResponse
@@ -16,7 +16,9 @@ router = APIRouter()
     "/crete_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_fair(
-    fair_in: FairCreate, db: AsyncSession = Depends(get_db)
+    fair_in: FairCreate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)
 ) -> FairResponse:
     """
     Create a new fair.
@@ -56,7 +58,9 @@ async def create_fair(
 @router.post(
     "/change_fair", response_model=FairResponse, status_code=status.HTTP_200_OK
 )
-async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
+async def change_fair(fair_in: FairCreate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)):
     """
     Change the details of an existing fair.
     Args:
@@ -83,8 +87,8 @@ async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
     return fair
 
 
-@router.get("/get_all_active_fairs", response_model=List[FairResponse], status_code=status.HTTP_200_OK)
-async def get_all_fairs(db: AsyncSession = Depends(get_db)) -> List[FairResponse]:
+@router.get("/get_all_active_fairs", response_model=list[FairResponse], status_code=status.HTTP_200_OK)
+async def get_all_fairs(db: AsyncSession = Depends(get_db)) -> list[FairResponse]:
     """
     Retrieve all fairs.
     Args:

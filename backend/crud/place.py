@@ -98,7 +98,13 @@ class CRUDPlace(CRUDBase[Place, PlaceCreate, PlaceUpdate]):
         place = await CRUDPlace.get_place_by_cordinates(
             db=db, place_cordinates=place_cordinates
         )
-        await db.run_sync(lambda sync_session: place.fairs.remove(fair))
+
+        # if fair not in place.fairs:
+        #     return place
+        try:
+            await db.run_sync(lambda sync_session: place.fairs.remove(fair))
+        except:
+            pass
         db.add(place)
 
         await db.commit()

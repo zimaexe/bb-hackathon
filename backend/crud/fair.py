@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import Optional
-
+from typing import Optional, List
+from datetime import datetime
 from backend.crud.base import CRUDBase
 from backend.models.fair import Fair
 from backend.schemas.fair import FairCreate, FairUpdate
@@ -55,7 +55,7 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
         return new_fair
 
     @staticmethod
-    async def change_fair(db: AsyncSession, fair_in: "FairCreate") -> "Fair":
+    async def change_fair(db: AsyncSession, fair_in: "FairUpdate") -> "Fair":
         """
         Update an existing fair with new details.
         Args:
@@ -71,7 +71,7 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
 
         fair.name = fair_in.name
         fair.start_day = fair_in.start_day.replace(tzinfo=None)
-        fair.end_day = fair.end_day.replace(tzinfo=None)
+        fair.end_day = fair_in.end_day.replace(tzinfo=None)
 
         db.add(fair)
 

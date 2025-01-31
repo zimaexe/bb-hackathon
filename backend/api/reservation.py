@@ -17,49 +17,24 @@ router = APIRouter()
 
 
 @router.post(
-    "/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED
+    "/create_reservation", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_reservation(
-    reservation_in: ReservationCreate,get_current_user_email: Annotated[
+        fair_name: str, place_cordinates: str, business_email: Annotated[
         str, Security(get_current_user_email)
     ], db: AsyncSession = Depends(get_db),
 ) -> ReservationResponse:
     """
     Create a new reservation for a place.
     """
-    buisness = await business_crud.get_by_email(db=db, email=business_email)
-    if not buisness:
-        logger.error(f"Error creating reservation: Business {business_email} not found.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Business not found.",
-        )
-    fair = await fair_crud.get_by_name(db=db, name=fair_name)
-    if not fair:
-        logger.error(f"Error creating reservation: Fair {fair_name} not found.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Fair not found.",
-        )
-    place = await place_crud.get_place_by_cordinates(db, place_cordinates)
-    if not place:
-        logger.error(f"Error creating reservation: Place {place_cordinates} not found.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Place not found.",
-        )
-    payment = None
-    reservation = ReservationCreate(
-        business_id=buisness.id,
-        fair_id=fair.id,
-        payment_id=payment,
-        place_id=place.id,
-    )
-    try:
-        reservation = await reservation_crud.create_reservation(db=db,business=buisness, place=place, fair=fair, reservation_in=reservation)
-        logger.info(f"Reservation created successfully: {reservation}")
-    except Exception as e:
-        logger.error(f"Exception occurred: {e}")
+
+    if await reservation_crud.is_place_reserved(db=db, place_cordinates=place_cordinates, fair_name=fair_name):
+        raise HTTPException(status_code=status.HTTP_226_IM_USED, detail="Place already was registred")
+
+    reservation = await reservation_crud.create_reservation(db=db, business=business_email, place=place_cordinates, fair=fair_name)
+
+    if not reservation:
+        logger.error(f"Exception occurred while making reservation")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong.",
@@ -68,8 +43,10 @@ async def create_reservation(
     return reservation
 
 
-@router.delete("/reservation/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_reservation(reservation_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+@router.delete("/delete_reservation_by_id", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_reservation_id(reservation_id: uuid.UUID, business_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
     """
     Delete a reservation by reservation ID.
     """
@@ -83,23 +60,24 @@ async def delete_reservation(reservation_id: uuid.UUID, db: AsyncSession = Depen
         )
     return
 
-@router.delete("/reservation/expired_payment_delete_reservatoin/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def expired_payment_delete_reservatoin(reservation_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+@router.delete("/delete_unpaid_reservations", status_code=status.HTTP_204_NO_CONTENT)
+async def expired_payment_delete_reservatoin(db: AsyncSession = Depends(get_db)):
     """
     Delete a reservation with expired payment.
     """
+    await reservation_crud.expired_payment_delete_reservatoin(db=db)
+
+@router.delete("/delete_reservation", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_reservation(business_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
     try:
-        reservation = await reservation_crud.expired_payment_delete_reservatoin(db=db, reservation_id=reservation_id)
-        if reservation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Reservation not deleted.",
-            )
-        logger.info(f"Reservation deleted successfully: {reservation}")
+        b = await business_crud.get_by_email(db=db, email=business_email)
+        await delete_reservation_id(reservation_id=b.reservations[-1].id, business_email=business_email, db=db)
     except Exception as e:
         logger.error(f"Exception occurred: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Something went wrong1.",
+            detail="Something went wrong.",
         )
     return
