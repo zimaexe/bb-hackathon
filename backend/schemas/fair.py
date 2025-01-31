@@ -19,7 +19,7 @@ class FairBase(BaseModel):
     name: str
     start_day: datetime
     end_day: datetime
-    fair_places: list[PlaceBase] = []
+    # fair_places: list[PlaceBase]
 
 
 class FairCreate(FairBase):
