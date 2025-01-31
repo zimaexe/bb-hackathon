@@ -48,6 +48,7 @@ export default function Sidebar() {
       bg-[#eeeeee]
       flex flex-col gap-[25px]
       px-[20px] pt-[150px]
+      rounded-[0px_20px_20px_0px]
     ">
         <div className="flex items-center px-[30px] py-[20px]">
             <h1 className="text-[36px] font-bold">Menu</h1>
