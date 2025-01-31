@@ -54,4 +54,4 @@ class BusinessResponse(BusinessBase):
     id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

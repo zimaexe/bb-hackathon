@@ -1,17 +1,17 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
+from typing import Annotated
 
 from backend.db.session import get_db
-
 from backend.crud.reservation import reservation_crud
 from backend.crud.fair import fair_crud
 from backend.crud.place import place_crud
 from backend.crud.business import business_crud
 from backend.schemas.reservation import ReservationCreate, ReservationResponse
-
+from backend.services.auth import get_current_user_email
 
 router = APIRouter()
 
@@ -20,7 +20,9 @@ router = APIRouter()
     "/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_reservation(
-    business_email: str, fair_name: str, place_cordinates: str , db: AsyncSession = Depends(get_db)
+    reservation_in: ReservationCreate,get_current_user_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db),
 ) -> ReservationResponse:
     """
     Create a new reservation for a place.
