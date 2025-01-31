@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d376ac4e1a64
+Revision ID: 23a6444cfba5
 Revises: 
-Create Date: 2025-01-30 22:07:38.255116
+Create Date: 2025-01-30 22:41:07.149416
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd376ac4e1a64'
+revision: str = '23a6444cfba5'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -59,7 +59,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('id')
     )
     op.create_table('place',
-    sa.Column('place_name', sa.String(length=50), nullable=True),
+    sa.Column('place_name', sa.String(length=50), nullable=False),
     sa.Column('place_zona', sa.INTEGER(), nullable=True),
     sa.Column('place_cordinates', sa.String(length=50), nullable=True),
     sa.Column('place_reservated', sa.BOOLEAN(), nullable=False),
@@ -68,8 +68,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id'),
-    sa.UniqueConstraint('place_cordinates'),
-    sa.UniqueConstraint('place_name')
+    sa.UniqueConstraint('place_cordinates')
     )
     op.create_table('fair_place_association',
     sa.Column('fair_id', sa.UUID(), nullable=True),
