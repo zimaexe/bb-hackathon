@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React from "react";
+import QRCode from "react-qr-code";
 import '../../app/globals.css';
 import Sidebar from '../../components/sidebar';
 import { NextRouter, useRouter } from 'next/router';
@@ -84,7 +85,7 @@ function PaymentList({ payments, router } : { payments: PaymentType[], router: N
   )
 }
 
-function PaymentDetail({ payments, paymentID } : { payments: PaymentType[], paymentID: string }) {
+function PaymentDetail({ payments, paymentID } : { payments: PaymentType[], paymentID: string }) {  
   return (
     <>
       <h1 className="font-bold text-[48px]">Detail platby</h1>
@@ -94,6 +95,7 @@ function PaymentDetail({ payments, paymentID } : { payments: PaymentType[], paym
       ">
         <p>paymentID: {paymentID}</p>
         <p>nazov: {payments.filter((payment) => payment.id === paymentID)[0]?.description}</p>
+        <QRCode value={`http://0.0.0.0:1488/get_reservation/${paymentID}`} />
       </div>
     </>
   )
@@ -103,9 +105,9 @@ export default function Payments() {
   const router = useRouter();
 
   const payments = [
-    new PaymentType('Registrácia na jarmok', 10, 'paid', '12.10.2021', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p'),
-    new PaymentType('Rezervácia stánku', 20, 'unpaid', '12.10.2021', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5q'),
-    new PaymentType('Rezervácia stánku', 20, 'processing', '12.10.2021', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5r'),
+    new PaymentType('Rezervácia stánku 4 metrov', 8, 'processing', '01.02.2025', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5r'),
+    new PaymentType('Rezervácia stánku 10 metrov', 20, 'paid', '12.12.2024', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p'),
+    new PaymentType('Rezervácia stánku 10 metrov', 20, 'unpaid', '12.10.2023', 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5q'),
   ];
 
   const paymentID = router.query.paymentID as string;

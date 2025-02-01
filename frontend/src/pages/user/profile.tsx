@@ -1,4 +1,4 @@
-'use server';
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import '../../app/globals.css';
@@ -47,15 +47,45 @@ function ProfileField({ idx, label, value, changeField } : ProfileFieldProps) {
 export default function Profile() {
   const [wasChanged, setWasChanged] = useState(false);
   const [fields, setFields] = useState([
-    { label: 'meno', value: 'Janko' },
-    { label: 'priezvisko', value: 'Hraško' },
-    { label: 'nazov firmy', value: 'NazovFirmy' },
-    { label: 'telefon', value: '0904123456' },
-    { label: 'email', value: 'something@gmail.com' },
-    { label: 'ICO', value: 123123123123 },
-    { label: 'rodne cislo', value: '123456/7890' }
+    { label: 'meno', value: '' },
+    { label: 'priezvisko', value: '' },
+    { label: 'nazov firmy', value: '' },
+    { label: 'telefon', value: '' },
+    { label: 'email', value: '' },
+    { label: 'ICO', value: '' },
+    { label: 'rodne cislo', value: '' }
   ]);
   const [initialFields,] = useState(structuredClone(fields));
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("token")?.toString() || "null")?.access_token;
+    if (!token) return;
+    fetch('http://192.168.1.85:1488/get_info', {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Data", data);
+      const newFields = fields.map((field) => {
+        switch (field.label) {
+          case 'nazov firmy':
+            field.value = data.business_name;
+            break;
+          case 'email':
+            field.value = data.email;
+            break;
+          case 'telefon':
+            field.value = data.phone;
+            break;
+        }
+
+        return field;
+      });
+      setFields(newFields);
+    })
+  }, []);
 
   useEffect(() => {
     const changed = fields.some((field, index) => field.value !== initialFields[index].value);

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../app/globals.css';
 import Sidebar from '../../components/sidebar';
 import { UUID } from 'crypto';
@@ -95,28 +95,51 @@ function FairDetail({ events, eventID } : { events: FairType[], eventID: string 
   )
 }
 
+async function getFairs() {
+  const fairsList: FairType[] = [];
+  const endpoint = "http://192.168.1.85:1488";
+
+  await fetch(`${endpoint}/get_all_active_fairs`, {
+    method: "GET",
+    headers: {
+      "content-type": "application/json"
+    }
+  })
+  .then((res) => {
+    console.log("Response", res)
+    return res.json()
+  })
+  .then((fairs) => {
+    console.log("Fairs", fairs)
+    fairs.forEach(({ name, start_day, end_day, id } : { name: string, start_day: string, end_day: string, id: UUID }) => {
+      fairsList.push(new FairType(
+        name,
+        {
+          from: new Date(start_day).toISOString(),
+          to: new Date(end_day).toISOString()
+        },
+        id
+      ));
+    });
+  })
+  .catch((err) => {
+    console.log("Error", err)
+  });
+
+  return fairsList;
+}
+
 export default function Fairs() {
   const router = useRouter();
+  
+  const [events, setEvents] = useState<FairType[]>([]);
 
-  const events: FairType[] = [
-    new FairType(
-      'zimny revucky jarmok 2024',
-      {
-        from: '2024-11-15',
-        to: '2024-11-17'
-      },
-      'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
-    ),
-    new FairType(
-      'letny revucky jarmok 2024',
-      {
-        from: '2024-06-15',
-        to: '2024-06-17'
-      },
-      'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'
-    )
-  ];
-
+  useEffect(() => {
+    getFairs().then((fairs) => {
+      setEvents(fairs);
+    });
+  }, []);
+  
   const eventID = router.query.eventID as string;
 
   return (
