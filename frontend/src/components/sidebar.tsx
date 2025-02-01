@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextRouter } from 'next/router';
+import { getUserData } from 'serverutils';
 
 interface MenuOptionProps {
     icon?: React.ReactNode;
@@ -29,9 +30,23 @@ function MenuOption({ icon = null, route, router, text } : MenuOptionProps) {
   )
 }
 
-
 export default function Sidebar() {
   const router = useRouter();
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    console.log(localStorage.getItem("token"))
+    getUserData(localStorage.getItem("token"))
+      .then((data) => {
+        console.log(data);
+        try {
+          setUsername(data.split("@")[0]);
+        } catch (e) {
+          console.error(e);
+          window.location.href = "/login";
+        }
+      });
+  }, []);
 
   const routes = [
     { route: "/user/fairs", text: "Jarmoky" },
@@ -50,8 +65,9 @@ export default function Sidebar() {
       px-[20px] pt-[150px]
       rounded-[0px_20px_20px_0px]
     ">
-        <div className="flex items-center px-[30px] py-[20px]">
-            <h1 className="text-[36px] font-bold">Menu</h1>
+        <div className="flex items-center px-[30px] py-[20px] w-full justify-between">
+          <h1 className="text-[36px] font-bold">Menu</h1>
+          <p className='text-[18px] text-[goldenrod] font-bold'>{username}</p>
         </div>
         {routes.map((route, index) => (
           <MenuOption key={index} router={router} route={route.route} text={route.text} />
