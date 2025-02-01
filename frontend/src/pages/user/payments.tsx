@@ -95,7 +95,7 @@ function PaymentDetail({ payments, paymentID } : { payments: PaymentType[], paym
       ">
         <p>paymentID: {paymentID}</p>
         <p>nazov: {payments.filter((payment) => payment.id === paymentID)[0]?.description}</p>
-        <QRCode value={`http://0.0.0.0:1488/get_reservation/${paymentID}`} />
+        <QRCode value={`http://0.0.0.0:8000/get_reservation/${paymentID}`} />
       </div>
     </>
   )

@@ -124,7 +124,7 @@ function CircleDrawer({ coords, setCoords }: CoordsProps) {
 }
 
 function getPoints(name: string | undefined): Promise<FairPoint[]> {
-  return fetch(`http://192.168.1.85:1488/get_fair_places?fair_name=${name}`, {
+  return fetch(`http://localhost:8000/get_fair_places?fair_name=${name}`, {
     method: "POST",
     headers: {
       "content-type": "application/json"

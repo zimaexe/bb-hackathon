@@ -97,7 +97,7 @@ function FairDetail({ events, eventID } : { events: FairType[], eventID: string 
 
 async function getFairs() {
   const fairsList: FairType[] = [];
-  const endpoint = "http://192.168.1.85:1488";
+  const endpoint = "http://localhost:8000";
 
   await fetch(`${endpoint}/get_all_active_fairs`, {
     method: "GET",

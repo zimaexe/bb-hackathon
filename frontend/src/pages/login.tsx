@@ -22,7 +22,7 @@ export function loginRequest({ email, password } : { email: string, password: st
   form.appendChild(passwordInput);
 
   const formData = new FormData(form);
-  const endpoint = "http://192.168.1.85:1488";
+  const endpoint = "http://localhost:8000";
 
   fetch(`${endpoint}/login`, {
     method: "POST",

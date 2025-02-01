@@ -60,7 +60,7 @@ export default function Profile() {
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("token")?.toString() || "null")?.access_token;
     if (!token) return;
-    fetch('http://192.168.1.85:1488/get_info', {
+    fetch('http://localhost:8000/get_info', {
       headers: {
         "Authorization": `Bearer ${token}`,
       },

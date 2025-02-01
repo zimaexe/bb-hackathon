@@ -14,7 +14,7 @@ interface RegisterProps {
 }
 
 async function registerRequest({ email, password, businessName, phoneNumber } : RegisterProps) {
-  const endpoint = "http://192.168.1.85:1488";
+  const endpoint = "http://localhost:8000";
   await fetch(`${endpoint}/register`, {
     method: "POST",
     headers: {
