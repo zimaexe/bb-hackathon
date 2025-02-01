@@ -92,10 +92,11 @@ class PaymentBase(BaseModel):
         payment_status (str): The status of the payment.
     """
 
-    payment_client: PaymentClient
-    payment_invoice: PaymentInvoice
-    payment_item: PaymentItem
+    # payment_client: PaymentClient
+    # payment_invoice: PaymentInvoice
+    # payment_item: PaymentItem
     payment_status: str
+    payment_stripe_id: int
 
 
 class PaymentCreate(PaymentBase):
@@ -127,4 +128,4 @@ class PaymentResponse(PaymentBase):
     reservation_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

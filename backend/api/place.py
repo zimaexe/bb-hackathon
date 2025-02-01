@@ -1,19 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
-
+from typing import Annotated
+from backend.services.auth import get_current_user_email
 from backend.schemas.place import PlaceCreate, PlaceResponse
 from backend.crud.place import place_crud
 from backend.crud.fair import fair_crud
 from backend.db.session import get_db
-
+from backend.crud.reservation import reservation_crud
 router = APIRouter()
 
 
 @router.post(
     "/create_place", response_model=PlaceResponse, status_code=status.HTTP_200_OK
 )
-async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
+async def create_place(place: PlaceCreate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)):
     """
     Create a new place.
     This function creates a new place in the database. It first checks if a place with the same coordinates already exists.
@@ -30,7 +33,7 @@ async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
     """
 
     db_fair = await place_crud.get_place_by_cordinates(
-        db=db, name=place.place_cordinates
+        db=db, place_cordinates=place.place_cordinates
     )
     if db_fair:
         logger.error(
@@ -57,7 +60,9 @@ async def create_place(place: PlaceCreate, db: AsyncSession = Depends(get_db)):
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def add_place_fair(
-    place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)
+    place_cordinates: str, fair_name: str, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)
 ):
     """
     Asynchronously adds a fair to a place based on provided coordinates and fair name.
@@ -71,8 +76,8 @@ async def add_place_fair(
         The result of adding the fair to the place.
     """
 
-    place = place_crud.get_place_by_cordinates(db=db, place_cordinates=place_cordinates)
-    fair = fair_crud.get_by_name(db=db, name=fair_name)
+    place = await place_crud.get_place_by_cordinates(db=db, place_cordinates=place_cordinates)
+    fair = await fair_crud.get_by_name(db=db, name=fair_name)
 
     if not place or not fair:
         raise HTTPException(
@@ -91,7 +96,9 @@ async def add_place_fair(
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def add_place_fair(
-    place_cordinates: str, fair_name: str, db: AsyncSession = Depends(get_db)
+    place_cordinates: str, fair_name: str, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)
 ):
     """
     Asynchronously adds a fair to a place based on provided coordinates and fair name.
@@ -105,8 +112,8 @@ async def add_place_fair(
         The result of removing the fair from the place.
     """
 
-    place = place_crud.get_place_by_cordinates(db=db, place_cordinates=place_cordinates)
-    fair = fair_crud.get_by_name(db=db, name=fair_name)
+    place = await place_crud.get_place_by_cordinates(db=db, place_cordinates=place_cordinates)
+    fair = await fair_crud.get_by_name(db=db, name=fair_name)
 
     if not place or not fair:
         raise HTTPException(
@@ -117,3 +124,11 @@ async def add_place_fair(
     return await place_crud.remove_fair_from_place(
         db=db, place_cordinates=place_cordinates, fair=fair
     )
+
+@router.post("/place_reserved", status_code=status.HTTP_200_OK, response_model=bool)
+async def place_reservated(place_cordinated: str, fair_name: str, db: AsyncSession = Depends(get_db)):
+    result = await reservation_crud.is_place_reserved(db=db, place_cordinates=place_cordinated,fair_name=fair_name)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fair or place was not found")
+    return result
+

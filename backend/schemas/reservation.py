@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
 from datetime import datetime
@@ -18,8 +19,7 @@ class ReservationBase(BaseModel):
     business_id: UUID
     fair_id: UUID
     place_id: UUID
-    reserved_date: datetime
-    payment_id: UUID
+    payment_id: Optional[UUID] = None
 
 
 class ReservationCreate(ReservationBase):
@@ -46,6 +46,5 @@ class ReservationResponse(ReservationBase):
     """
 
     id: UUID
-
     class Config:
-        orm_mode = True
+        from_attributes = True

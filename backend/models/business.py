@@ -18,4 +18,4 @@ class Business(UserBase):
     business_name: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
     # Link to Reservation (1 Business -> Many Reservations)
-    reservations = relationship("Reservation", back_populates="business")
+    reservations = relationship("Reservation", back_populates="business", lazy="selectin")

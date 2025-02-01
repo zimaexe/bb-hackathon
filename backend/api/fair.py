@@ -1,22 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
-
+from typing import Annotated
 from backend.db.session import get_db
-
+from backend.services.auth import get_current_user_email
 from backend.crud.fair import fair_crud
-
+from backend.crud.business import business_crud
 from backend.schemas.fair import FairCreate, FairResponse
-
-
+from backend.schemas.business import BusinessResponse
+from backend.crud.payment import payment_crud
+from backend.schemas.payment import PaymentResponse
+from backend.schemas.place import PlaceResponse
 router = APIRouter()
 
 
 @router.post(
-    "/crete_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
+    "/create_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_fair(
-    fair_in: FairCreate, db: AsyncSession = Depends(get_db)
+    fair_in: FairCreate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)
 ) -> FairResponse:
     """
     Create a new fair.
@@ -56,7 +60,9 @@ async def create_fair(
 @router.post(
     "/change_fair", response_model=FairResponse, status_code=status.HTTP_200_OK
 )
-async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
+async def change_fair(fair_in: FairCreate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)):
     """
     Change the details of an existing fair.
     Args:
@@ -81,3 +87,45 @@ async def change_fair(fair_in: FairCreate, db: AsyncSession = Depends(get_db)):
             detail="Something went wrong.",
         )
     return fair
+
+
+@router.get("/get_all_active_fairs", response_model=list[FairResponse], status_code=status.HTTP_200_OK)
+async def get_all_fairs(db: AsyncSession = Depends(get_db)) -> list[FairResponse]:
+    """
+    Retrieve all fairs.
+    Args:
+        db (AsyncSession): The database session.
+    Returns:
+        List[FairResponse]: A list of all fairs in the database.
+    """
+
+    fairs = await fair_crud.get_all_active_fairs(db=db)
+    return [FairResponse.model_validate(fair) for fair in fairs]
+
+@router.get("/info", response_model=list[BusinessResponse])
+async def get_all_info(db: AsyncSession = Depends(get_db)):
+    fairs = await fair_crud.get_all_active_fairs(db=db)
+    if not fairs:
+        raise HTTPException(status_code=404, detail="active fair was not found")
+
+    all_business = []
+    for fair in list(fairs):
+        for reservation in list(fair.reservations):
+            all_business.append(( await business_crud.get_by_id(db=db, obj_id=reservation.business_id)))
+
+    return all_business
+
+@router.get("/all_payments", response_model=list[PaymentResponse])
+async def get_payments(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
+    b = await business_crud.get_by_email(db=db, email=user_email)
+    paymnet = []
+    for reservation in b.reservations:
+        paymnet.append(await payment_crud.get_by_id(db=db, obj_id=reservation.payment_id))
+
+    return paymnet
+
+@router.post('/get_fair_places')
+async def get_places(fair_name: str, db: AsyncSession = Depends(get_db)):
+    return await fair_crud.get_places(db=db, fair_name=fair_name)

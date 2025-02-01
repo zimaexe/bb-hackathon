@@ -12,6 +12,8 @@ class Payment(BaseModel):
     """
 
     __tablename__ = "payment"
-    payment_status: Mapped[str] = mapped_column(default="pendign")
+    payment_status: Mapped[str] = mapped_column(default="pending")
+    payment_stripe_id : Mapped[int]
+
     # 1:1 with Reservation
     reservation = relationship("Reservation", back_populates="payment", uselist=False)

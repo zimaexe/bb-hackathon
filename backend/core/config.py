@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_minutes: int = 1000
     algorithm: str = "HS256"
-
     # Email settings
     # email_signup_confirmation_token_expire_hours: int = 1
     # mail_from: str
@@ -31,6 +30,7 @@ class Settings(BaseSettings):
     db_host: str = Field(default="localhost", alias="DB_HOST")
     db_port: int = 5432
 
+    stripe_api_key: str
     # Google authentication settings
     # google_client_id: str
     # google_client_secret: str

@@ -1,16 +1,29 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import Optional
-
+from typing import Optional, List
+from datetime import datetime
 from backend.crud.base import CRUDBase
 from backend.models.fair import Fair
 from backend.schemas.fair import FairCreate, FairUpdate
+
+
 
 
 class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
     """
     CRUD operations for the Fair model.
     """
+    @staticmethod
+    async def get_all_active_fairs(db: AsyncSession) -> List[Fair]:
+        """
+        Retrieve all active fairs.
+        :param db: Database session.
+        :return: List of active Fairs.
+        """
+        stmt = select(Fair).filter(Fair.end_day >= datetime.now())
+        result = await db.execute(stmt)
+        return result.scalars().all()
+
 
     @staticmethod
     async def get_by_name(db: AsyncSession, name: str) -> Optional[Fair]:
@@ -43,7 +56,7 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
         return new_fair
 
     @staticmethod
-    async def change_fair(db: AsyncSession, fair_in: "FairCreate") -> "Fair":
+    async def change_fair(db: AsyncSession, fair_in: "FairUpdate") -> "Fair":
         """
         Update an existing fair with new details.
         Args:
@@ -55,17 +68,24 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
 
         fair = await CRUDFair.get_by_name(db=db, name=fair_in.name)
         if not fair:
-            return
+            return None
 
         fair.name = fair_in.name
         fair.start_day = fair_in.start_day.replace(tzinfo=None)
-        fair.end_day = fair.end_day.replace(tzinfo=None)
+        fair.end_day = fair_in.end_day.replace(tzinfo=None)
 
         db.add(fair)
 
         await db.commit()
         await db.refresh(fair)
         return fair
+
+    @staticmethod
+    async def get_places(db: AsyncSession, fair_name: str):
+        fair = await fair_crud.get_by_name(db=db, name=fair_name)
+        print("\n\n\n\n\n\\n\n\n\n")
+        print(fair.places)
+        return fair.places
 
 
 fair_crud = CRUDFair(Fair)

@@ -9,15 +9,16 @@ class CRUDAdmin(CRUDBase[Admin, AdminCreate, AdminUpdate]):
     """
     CRUD class for handling Admin entities.
     """
-
-    async def get_by_email(self, db: AsyncSession, email: str):
+    @staticmethod
+    async def get_by_email(db: AsyncSession, email: str):
         """
         Retrieve a Business entity by email.
         """
         result = await db.execute(select(Admin).filter(Admin.email == email))
         return result.scalar_one_or_none()
 
-    async def create_admin(self, db: AsyncSession, admin_in: AdminCreate):
+    @staticmethod
+    async def create_admin(db: AsyncSession, admin_in: AdminCreate):
         """
         Create a new Admin entity and return it.
         """
@@ -29,6 +30,12 @@ class CRUDAdmin(CRUDBase[Admin, AdminCreate, AdminUpdate]):
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
+
+    @staticmethod
+    async def change_admin(db: AsyncSession, admin_in: AdminUpdate):
+        admin = await CRUDAdmin.get_by_email(db=db, email=admin_in.email)
+        await CRUDBase.update(db=db, db_obj=admin, obj_in=admin_in)
+
 
 
 admin_crud = CRUDAdmin(Admin)

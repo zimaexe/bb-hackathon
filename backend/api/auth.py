@@ -1,11 +1,3 @@
-# register for fair
-# pay for fair
-# cancel reservation
-
-# pay
-
-# get buisness active reservation
-
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
@@ -17,7 +9,7 @@ from backend.db.session import get_db
 from backend.crud.business import business_crud
 from backend.crud.admin import admin_crud
 from backend.schemas.token import Token
-from backend.schemas.admin import AdminCreate, AdminResponse
+from backend.schemas.admin import AdminCreate, AdminResponse, AdminUpdate
 from backend.schemas.business import BusinessCreate, BusinessResponse
 from backend.services.auth import (
     auth_business,
@@ -142,3 +134,34 @@ async def add_admin(
             detail="Something went wrong.",
         )
     return admin
+
+@router.post("/change_admin", response_model=AdminResponse, status_code=status.HTTP_200_OK)
+async def change_admin(admin_in: AdminUpdate, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)):
+    try:
+        await admin_crud.change_admin(db=db, admin_in=admin_in)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+@router.post("/change_business", status_code=status.HTTP_200_OK, response_model=BusinessResponse)
+async def change_business(business_in: BusinessCreate,business_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
+    try:
+        await business_crud.change_business(db=db, email=business_email, admin_in=business_in)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+@router.get("/me")
+async def get_info(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ]):
+    return user_email
+
+@router.get("/get_info", response_model=BusinessResponse)
+async def get_info(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
+    b = await business_crud.get_by_email(db=db, email=user_email)
+    return b
