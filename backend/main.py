@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from loguru import logger
 
@@ -10,6 +11,7 @@ from backend.api.place import router as place_router
 from backend.api.fair import router as fair_router
 from backend.api.auth import router as auth_router
 from backend.api.payment import router as pay_router
+from backend.api.qrcode import router as qr_router
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -19,9 +21,19 @@ app.include_router(fair_router, tags=["Fair"])
 app.include_router(auth_router, tags=["Auth"])
 app.include_router(reservation_router, tags=["Reservation"])
 app.include_router(pay_router, tags=["Payment"])
+app.include_router(qr_router, tags=["QRCode"])
+
 
 app.add_middleware(
     SessionMiddleware, secret_key=settings.secret_key, same_site="lax", max_age=None
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 # Configure Loguru
 logger.remove()  # Remove default logger to configure custom settings

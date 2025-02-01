@@ -1,11 +1,3 @@
-# register for fair
-# pay for fair
-# cancel reservation
-
-# pay
-
-# get buisness active reservation
-
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
@@ -160,3 +152,16 @@ async def change_business(business_in: BusinessCreate,business_email: Annotated[
         await business_crud.change_business(db=db, email=business_email, admin_in=business_in)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+@router.get("/me")
+async def get_info(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ]):
+    return user_email
+
+@router.get("/get_info", response_model=BusinessResponse)
+async def get_info(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
+    b = await business_crud.get_by_email(db=db, email=user_email)
+    return b

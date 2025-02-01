@@ -81,3 +81,14 @@ async def delete_reservation(business_email: Annotated[
             detail="Something went wrong.",
         )
     return
+
+@router.post("/get_reservation/{id}", status_code=status.HTTP_200_OK)
+async def get_reservation(id: uuid.UUID, user_email: Annotated[
+        str, Security(get_current_user_email, scopes=["admin"])
+    ], db: AsyncSession = Depends(get_db)):
+    reservation =  await reservation_crud.get_by_id(db=db, obj_id=id)
+
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="reservation was not found")
+
+    return reservation

@@ -131,3 +131,4 @@ async def place_reservated(place_cordinated: str, fair_name: str, db: AsyncSessi
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fair or place was not found")
     return result
+

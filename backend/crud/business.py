@@ -40,4 +40,16 @@ class CRUDBusiness(CRUDBase[Business, BusinessCreate, BusinessUpdate]):
         admin = await CRUDBusiness.get_by_email(db=db, email=email)
         await CRUDBase.update(db=db, db_obj=admin, obj_in=admin_in)
 
+    @staticmethod
+    async def get_reservation_id(db: AsyncSession, email:str):
+        business = await CRUDBusiness.get_by_email(db=db, email=email)
+
+        if not business:
+            return
+        try:
+            reservation = business.reservations[-1]
+        except:
+            return
+        return reservation.id
+
 business_crud = CRUDBusiness(Business)

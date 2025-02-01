@@ -5,15 +5,17 @@ from typing import Annotated
 from backend.db.session import get_db
 from backend.services.auth import get_current_user_email
 from backend.crud.fair import fair_crud
-
+from backend.crud.business import business_crud
 from backend.schemas.fair import FairCreate, FairResponse
-
-
+from backend.schemas.business import BusinessResponse
+from backend.crud.payment import payment_crud
+from backend.schemas.payment import PaymentResponse
+from backend.schemas.place import PlaceResponse
 router = APIRouter()
 
 
 @router.post(
-    "/crete_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
+    "/create_fair", response_model=FairResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_fair(
     fair_in: FairCreate, user_email: Annotated[
@@ -99,3 +101,31 @@ async def get_all_fairs(db: AsyncSession = Depends(get_db)) -> list[FairResponse
 
     fairs = await fair_crud.get_all_active_fairs(db=db)
     return [FairResponse.model_validate(fair) for fair in fairs]
+
+@router.get("/info", response_model=list[BusinessResponse])
+async def get_all_info(db: AsyncSession = Depends(get_db)):
+    fairs = await fair_crud.get_all_active_fairs(db=db)
+    if not fairs:
+        raise HTTPException(status_code=404, detail="active fair was not found")
+
+    all_business = []
+    for fair in list(fairs):
+        for reservation in list(fair.reservations):
+            all_business.append(( await business_crud.get_by_id(db=db, obj_id=reservation.business_id)))
+
+    return all_business
+
+@router.get("/all_payments", response_model=list[PaymentResponse])
+async def get_payments(user_email: Annotated[
+        str, Security(get_current_user_email)
+    ], db: AsyncSession = Depends(get_db)):
+    b = await business_crud.get_by_email(db=db, email=user_email)
+    paymnet = []
+    for reservation in b.reservations:
+        paymnet.append(await payment_crud.get_by_id(db=db, obj_id=reservation.payment_id))
+
+    return paymnet
+
+@router.post('/get_fair_places')
+async def get_places(fair_name: str, db: AsyncSession = Depends(get_db)):
+    return await fair_crud.get_places(db=db, fair_name=fair_name)

@@ -24,6 +24,7 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
         result = await db.execute(stmt)
         return result.scalars().all()
 
+
     @staticmethod
     async def get_by_name(db: AsyncSession, name: str) -> Optional[Fair]:
         """
@@ -78,6 +79,13 @@ class CRUDFair(CRUDBase[Fair, FairCreate, FairUpdate]):
         await db.commit()
         await db.refresh(fair)
         return fair
+
+    @staticmethod
+    async def get_places(db: AsyncSession, fair_name: str):
+        fair = await fair_crud.get_by_name(db=db, name=fair_name)
+        print("\n\n\n\n\n\\n\n\n\n")
+        print(fair.places)
+        return fair.places
 
 
 fair_crud = CRUDFair(Fair)

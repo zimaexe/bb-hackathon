@@ -22,7 +22,7 @@ class Fair(BaseModel):
 
     # Many-to-Many with Place
     places = relationship(
-        "Place", secondary=fair_place_association, back_populates="fairs"
+        "Place", secondary=fair_place_association, back_populates="fairs", lazy="selectin"
     )
     # 1 Fair -> Many Reservations
-    reservations = relationship("Reservation", back_populates="fair")
+    reservations = relationship("Reservation", back_populates="fair", lazy="selectin")

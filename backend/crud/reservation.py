@@ -58,6 +58,14 @@ class CRUDReservation(CRUDBase[Reservation, ReservationCreate, ReservationCreate
 
         await db.commit()
 
+    @staticmethod
+    async def get_business_by_reservatoin_id(obj):
+        # result = await CRUDReservation.get_by_id(db=db, obj_id=obj_id)
+
+        # if not result:
+        #     return
+
+        return obj.business
 
     @staticmethod
     async def create_reservation(db: AsyncSession, business: str, place: str, fair: str) -> Reservation:
